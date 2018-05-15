@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background = "#FFEFA5">
+
+        <ImageView
+            android:id="@+id/imageView_Owners"
+            android:layout_width="272dp"
+            android:layout_height="150dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView_Owners"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="11dp"
+                android:layout_marginStart="11dp"
+                android:layout_marginTop="11dp"
+                android:layout_toEndOf="@+id/imageView_car"
+                android:layout_toRightOf="@+id/imageView_car"
+                android:layout_weight="1"
+                android:fontFamily="@font/porticofont"
+                android:textColor="#A87E00"
+                android:maxLines="3"
+                android:scrollbars="vertical"
+                android:textSize="19sp"
+                tools:text="dawdaw" />
+
+            <TextView
+                android:id="@+id/textView_OwnersDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/textView_brand"
+                android:layout_alignStart="@+id/textView_brand"
+                android:layout_alignTop="@+id/textView_brand"
+                android:layout_marginLeft="11dp"
+                android:layout_marginTop="34dp"
+                android:layout_weight="1"
+                android:maxLines="3"
+                android:text="dawda"
+                android:textSize="17sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

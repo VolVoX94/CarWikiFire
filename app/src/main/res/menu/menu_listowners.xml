@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <item
+        android:id="@+id/actions_settings"
+        android:orderInCategory="100"
+        android:title="Settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/actions_add"
+        android:orderInCategory="100"
+        android:title="Add"
+        android:icon="@drawable/add"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/actions_seeCars"
+        android:orderInCategory="100"
+        android:title="See Cars"
+        android:icon="@drawable/car"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/actions_seeBrands"
+        android:orderInCategory="100"
+        android:title="See Brands"
+        android:icon="@drawable/brand"
+        app:showAsAction="always" />
+</menu>

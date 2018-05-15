@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <item
+        android:id="@+id/actions_settings"
+        android:orderInCategory="100"
+        android:title="Settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/actions_list"
+        android:orderInCategory="100"
+        android:title="Back to List"
+        android:icon="@drawable/list"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/actions_edit"
+        android:orderInCategory="100"
+        android:title="Edit"
+        android:icon="@drawable/edit"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/actions_remove"
+        android:orderInCategory="100"
+        android:title="Remove"
+        android:icon="@drawable/remove"
+        app:showAsAction="always" />
+</menu>

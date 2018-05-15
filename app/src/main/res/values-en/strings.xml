@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CarWiki</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="besitzer">Owner</string>
+    <string name="aufbau">Structure</string>
+    <string name="preis">Price</string>
+    <string name="model">Model</string>
+    <string name="zylinder">Zylinder</string>
+    <string name="xCoordinate">xCoordinate</string>
+    <string name="yCoordinate">yCoordinate</string>
+    <string name="url">Picture-URL</string>
+    <string name="hubraum">Cubic-Capacity</string>
+    <string name="baujahr">Year</string>
+    <string name="autohalter">Owner</string>
+    <string name="vorname">Pre-Name</string>
+    <string name="zurGallery">Go to Gallery</string>
+    <string name="standortAnsehen">Show location</string>
+    <string name="eintragabändern">Change entry</string>
+    <string name="abändern">Change</string>
+    <string name="nachname">Family-Name</string>
+    <string name="information">Information</string>
+    <string name="bild">Picture</string>
+    <string name="hinzufügen">Add</string>
+    <string name="neuerBesitzer">New Owner</string>
+    <string name="neueMarke">New Brand</string>
+    <string name="markenname">Name of the Brand</string>
+    <string name="kategorie">Categorie</string>
+    <string name="löschen">Delete entry</string>
+    <string name="sicher">Are you sure that you want to delete this entry?</string>
+    <string name="bestätigen">Confirm</string>
+    <string name="abbrechen">Abort</string>
+    <string name="neuesAuto">New Car</string>
+    <string name="spracheinstellungen">Language (German)</string>
+    <string name="spracheWechselnSicher">Are you sure that you want to change the language from English to German?</string>
+    <string name="aboutInhalt">CarWiki is a simple Wiki for Oldtimers and Cars in General. Made by Danilo Marty and Alexandre Crooij - Copyright 2018</string>
+    <string name="about">About</string>
+    <string name="ok">Ok</string>
+</resources>

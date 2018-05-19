@@ -14,12 +14,14 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.alexa.carwiki.Entities.CarBrandEntity;
+import com.example.alexa.carwiki.Entities.CarBrandEntity2;
 import com.example.alexa.carwiki.Helper.Async.DeleteBrandById;
 import com.example.alexa.carwiki.Helper.Download.DownloadImageTask;
 import com.example.alexa.carwiki.R;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class DetailsBrandsActivity extends AppCompatActivity {
-    private CarBrandEntity carbrand;
+    private CarBrandEntity2 carbrand;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +39,7 @@ public class DetailsBrandsActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Car Wiki");
 
         //Gets Context Object from Gallery
-        carbrand = (CarBrandEntity) getIntent().getSerializableExtra("ContextItem");
+        carbrand = (CarBrandEntity2) getIntent().getSerializableExtra("ContextItem");
 
         //Download Async Task in Order to get the Pictures from Web
         new DownloadImageTask((ImageView) findViewById(R.id.imageViewBrand)).execute(carbrand.getLogoUrl());
@@ -88,7 +90,11 @@ public class DetailsBrandsActivity extends AppCompatActivity {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            new DeleteBrandById(getWindow().getDecorView().getRootView()).execute(carbrand.getIdBrand());
+
+                            FirebaseDatabase.getInstance()
+                                    .getReference("brands")
+                                    .child(carbrand.getIdBrand()).removeValue();
+
                             Intent intent = new Intent(getApplicationContext(), GalleryBrandsActivity.class);
                             startActivity(intent);
                         }

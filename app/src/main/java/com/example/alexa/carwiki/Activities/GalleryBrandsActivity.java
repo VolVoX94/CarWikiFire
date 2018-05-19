@@ -13,15 +13,23 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import com.example.alexa.carwiki.Adapter.BrandAdapter;
 import com.example.alexa.carwiki.Entities.CarBrandEntity;
+import com.example.alexa.carwiki.Entities.CarBrandEntity2;
 import com.example.alexa.carwiki.Helper.Async.GetAllBrands;
 import com.example.alexa.carwiki.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 //Same as in Gallery Activity
 public class GalleryBrandsActivity extends AppCompatActivity {
 
-    private List<CarBrandEntity> carBrandEntities;
+    private List<CarBrandEntity2> carBrandEntities = new ArrayList<>();
+    private ListView brandGallery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,20 +45,9 @@ public class GalleryBrandsActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setTitle("Car Wiki");
 
-        ListView brandGallery = findViewById(R.id.galleryViewBrand);
-        GetAllBrands getAllBrands = new GetAllBrands(getWindow().getDecorView().getRootView());
+        brandGallery = findViewById(R.id.galleryViewBrand);
 
-        try {
-            carBrandEntities = getAllBrands.execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        BrandAdapter carBrandAdapter;
-        carBrandAdapter = new BrandAdapter(this, carBrandEntities);
-        brandGallery.setAdapter(carBrandAdapter);
+        addEventFirebaseListener();
 
         brandGallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -62,6 +59,37 @@ public class GalleryBrandsActivity extends AppCompatActivity {
         });
 
     }
+
+    private void addEventFirebaseListener(){
+        brandGallery.setVisibility(View.INVISIBLE);
+        FirebaseDatabase.getInstance()
+                .getReference("brands")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            if(carBrandEntities.size() > 0){
+                                carBrandEntities.clear();
+                            }
+                            for (DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+                                CarBrandEntity2 carBrandEntity2 = postSnapshot.getValue(CarBrandEntity2.class);
+                                carBrandEntity2.setIdBrand(postSnapshot.getRef().getKey());
+                                carBrandEntities.add(carBrandEntity2);
+                            }
+                            BrandAdapter adapter = new BrandAdapter(GalleryBrandsActivity.this,carBrandEntities);
+                            brandGallery.setAdapter(adapter);
+
+                            brandGallery.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_listbrands, menu);
@@ -89,5 +117,15 @@ public class GalleryBrandsActivity extends AppCompatActivity {
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private List<CarBrandEntity2> toClients(DataSnapshot snapshot) {
+        List<CarBrandEntity2> clients = new ArrayList<>();
+        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+            CarBrandEntity2 entity = childSnapshot.getValue(CarBrandEntity2.class);
+            entity.setIdBrand(childSnapshot.getKey());
+            clients.add(entity);
+        }
+        return clients;
     }
 }

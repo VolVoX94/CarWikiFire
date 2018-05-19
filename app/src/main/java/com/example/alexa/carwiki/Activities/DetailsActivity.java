@@ -15,19 +15,24 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.alexa.carwiki.Entities.CarBrandEntity;
+import com.example.alexa.carwiki.Entities.CarBrandEntity2;
 import com.example.alexa.carwiki.Entities.CarEntity;
+import com.example.alexa.carwiki.Entities.CarEntity2;
 import com.example.alexa.carwiki.Entities.OwnerEntity;
+import com.example.alexa.carwiki.Entities.OwnerEntity2;
 import com.example.alexa.carwiki.Helper.Async.DeleteCarById;
 import com.example.alexa.carwiki.Helper.Async.GetBrandById;
 import com.example.alexa.carwiki.Helper.Async.GetOwnerById;
 import com.example.alexa.carwiki.Helper.Download.DownloadImageTask;
 import com.example.alexa.carwiki.R;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.concurrent.ExecutionException;
 
 public class DetailsActivity extends AppCompatActivity {
-    private CarEntity car;
-    private CarBrandEntity currentCarBrandEntity;
-    private OwnerEntity currentOwnerEntity;
+    private CarEntity2 car;
+    private CarBrandEntity2 currentCarBrandEntity;
+    private OwnerEntity2 currentOwnerEntity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,25 +51,13 @@ public class DetailsActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Car Wiki");
 
         //Get Context Car Item from the Gallery
-        car = (CarEntity) getIntent().getSerializableExtra("ContextItem");
+        car = (CarEntity2) getIntent().getSerializableExtra("ContextItem");
+        currentOwnerEntity = (OwnerEntity2) getIntent().getSerializableExtra("ContextItemOwner");
+        currentCarBrandEntity = (CarBrandEntity2) getIntent().getSerializableExtra("ContextItemBrand");
+
 
         //Gets CarBrand related to Car
-        try {
-            currentCarBrandEntity = new GetBrandById(getWindow().getDecorView().getRootView()).execute(car.getIdBrand()).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
 
-        //Gets Owner related to Car
-        try {
-            currentOwnerEntity = new GetOwnerById(getWindow().getDecorView().getRootView()).execute(car.getIdOwner()).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
 
         //Download Async Task to get all the Images
         new DownloadImageTask((ImageView) findViewById(R.id.imageView_Brand)).execute(currentCarBrandEntity.getLogoUrl());
@@ -119,9 +112,12 @@ public class DetailsActivity extends AppCompatActivity {
         if(id==R.id.actions_edit){
             Intent intent = new Intent(getApplicationContext(), EditCarActivity.class);
             intent.putExtra("ContextItem",car);
+            intent.putExtra("ContextItemBrand", currentCarBrandEntity);
+            intent.putExtra("ContextItemOwner", currentOwnerEntity);
             startActivity(intent);
         }
         //Delete the entry
+
         if(id==R.id.actions_remove){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setCancelable(true);
@@ -131,7 +127,11 @@ public class DetailsActivity extends AppCompatActivity {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            new DeleteCarById(getWindow().getDecorView().getRootView()).execute(car.getIdCar());
+
+                            FirebaseDatabase.getInstance()
+                                    .getReference("cars")
+                                    .child(car.getIdCar()).removeValue();
+
                             Intent intent = new Intent(getApplicationContext(), GalleryActivity.class);
                             startActivity(intent);
                         }
@@ -144,7 +144,9 @@ public class DetailsActivity extends AppCompatActivity {
 
             AlertDialog dialog = builder.create();
             dialog.show();
+
         }
+
         return super.onOptionsItemSelected(item);
     }
 

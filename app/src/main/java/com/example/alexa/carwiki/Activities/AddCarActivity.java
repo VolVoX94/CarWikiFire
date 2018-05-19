@@ -8,66 +8,53 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.example.alexa.carwiki.Adapter.BrandAdapter;
 import com.example.alexa.carwiki.Entities.CarBrandEntity;
+import com.example.alexa.carwiki.Entities.CarBrandEntity2;
 import com.example.alexa.carwiki.Entities.CarEntity;
+import com.example.alexa.carwiki.Entities.CarEntity2;
 import com.example.alexa.carwiki.Entities.OwnerEntity;
+import com.example.alexa.carwiki.Entities.OwnerEntity2;
 import com.example.alexa.carwiki.Helper.Async.AddCar;
 import com.example.alexa.carwiki.Helper.Async.GetAllBrands;
 import com.example.alexa.carwiki.Helper.Async.GetAllOwners;
 import com.example.alexa.carwiki.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class AddCarActivity extends AppCompatActivity {
-    private List<OwnerEntity> ownerEntities;
-    private List<CarBrandEntity> carBrandEntities;
+    private List<OwnerEntity2> ownerEntities = new ArrayList<>();
+    private List<CarBrandEntity2> carBrandEntities = new ArrayList<>();
+    Spinner dropdownMarke;
+    Spinner dropdownHalter;
+
+    String[] itemsMarke;
+    String[] itemsHalter;
+
+    ArrayAdapter<String> adapterMarke;
+    ArrayAdapter<String> adapterHalter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_car);
 
-        //get All Brands for the Dropdown
-        GetAllBrands getAllBrands = new GetAllBrands(getWindow().getDecorView().getRootView());
-        GetAllOwners getAllOwners = new GetAllOwners(getWindow().getDecorView().getRootView());
-
-        try {
-            ownerEntities = getAllOwners.execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            carBrandEntities = getAllBrands.execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
         //Dropdown initialisation
-        Spinner dropdownMarke = findViewById(R.id.dropdown_Marke);
-        Spinner dropdownHalter = findViewById(R.id.dropdown_Halter);
+        dropdownMarke = findViewById(R.id.dropdown_Marke);
+        dropdownHalter = findViewById(R.id.dropdown_Halter);
 
-        String[] itemsMarke = new String[carBrandEntities.size()];
-        String[] itemsHalter = new String[ownerEntities.size()];
+        addEventFirebaseListenerBrand();
+        addEventFirebaseListenerOwner();
 
-        //transfer the description into a String array
-        for(int i=0; i<itemsMarke.length; i++){
-            itemsMarke[i]= carBrandEntities.get(i).getDescripion();
-        }
-        for(int i=0; i<itemsHalter.length; i++){
-            itemsHalter[i]= ownerEntities.get(i).getPrename()+" "+ownerEntities.get(i).getFamilyname();
-        }
-
-        //String adapters use to insert Data into Spinner(dropdown)
-        ArrayAdapter<String> adapterMarke = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, itemsMarke);
-        ArrayAdapter<String> adapterHalter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, itemsHalter);
-
-        dropdownMarke.setAdapter(adapterMarke);
-        dropdownHalter.setAdapter(adapterHalter);
     }
 
     //Add a Car and calls DAO
@@ -94,18 +81,34 @@ public class AddCarActivity extends AppCompatActivity {
                 !editTextHubraum.getText().toString().isEmpty()&&!editTextAufbau.getText().toString().isEmpty()&&!editTextZylinder.getText().toString().isEmpty()&&
                 !editTextBaujahr.getText().toString().isEmpty()&&!editTextBildUrl.getText().toString().isEmpty()&&!editTextxCoord.getText().toString().isEmpty()&&
                 !editTextyCoord.getText().toString().isEmpty()){
-            CarEntity carEntity = new CarEntity(ownerEntities.get(indexChosenHalter).getIdOwner(), carBrandEntities.get(indexChosenMarke).getIdBrand(),
+            CarEntity2 carEntity = new CarEntity2(ownerEntities.get(indexChosenHalter).getIdOwner(), carBrandEntities.get(indexChosenMarke).getIdBrand(),
                     editTextModel.getText().toString(),Float.parseFloat(editTextPreis.getText().toString()), editTextHubraum.getText().toString(),
                     Integer.parseInt(editTextxCoord.getText().toString()), Integer.parseInt(editTextyCoord.getText().toString()), editTextAufbau.getText().toString(),
                     Integer.parseInt(editTextZylinder.getText().toString()), Integer.parseInt(editTextBaujahr.getText().toString()), editTextBildUrl.getText().toString());
 
-            //Adds a new Car
-            new AddCar(view).execute(carEntity);
+            carEntity.setIdCar(UUID.randomUUID().toString());
+
+            System.out.println("index" + indexChosenHalter);
+            System.out.println(" halter " + carEntity.getIdOwner());
+            System.out.println("static" + ownerEntities.get(1).getIdOwner());
+
+            FirebaseDatabase.getInstance()
+                    .getReference("cars")
+                    .child(carEntity.getIdCar())
+                    .setValue(carEntity, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if (databaseError != null) {
+                                System.out.println("Error");
+                            } else {
+                                Intent i = new Intent(getApplicationContext(),  GalleryActivity.class);
+                                startActivity(i);
+                            }
+                        }
+                    });
 
             //Goes back to the Gallery
-            Intent i = new Intent(getApplicationContext(),  GalleryActivity.class);
 
-            startActivity(i);
         }
         //Warning
         else{
@@ -113,5 +116,75 @@ public class AddCarActivity extends AppCompatActivity {
         }
 
 
+    }
+
+
+
+    private void addEventFirebaseListenerBrand(){
+        dropdownMarke.setVisibility(View.INVISIBLE);
+        FirebaseDatabase.getInstance()
+                .getReference("brands")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            if(carBrandEntities.size() > 0){
+                                carBrandEntities.clear();
+                            }
+                            for (DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+                                CarBrandEntity2 carBrandEntity2 = postSnapshot.getValue(CarBrandEntity2.class);
+                                carBrandEntity2.setIdBrand(postSnapshot.getRef().getKey());
+                                carBrandEntities.add(carBrandEntity2);
+                            }
+                            itemsMarke = new String[carBrandEntities.size()];
+                            for(int i=0; i<itemsMarke.length; i++){
+                                itemsMarke[i]= carBrandEntities.get(i).getDescripion();
+                            }
+                            adapterMarke = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, itemsMarke);
+                            dropdownMarke.setAdapter(adapterMarke);
+
+                            dropdownMarke.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+    private void addEventFirebaseListenerOwner(){
+        dropdownHalter.setVisibility(View.INVISIBLE);
+        FirebaseDatabase.getInstance()
+                .getReference("owners")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            if(ownerEntities.size() > 0){
+                                ownerEntities.clear();
+                            }
+                            for (DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+                                OwnerEntity2 ownerEntity2 = postSnapshot.getValue(OwnerEntity2.class);
+                                ownerEntity2.setIdOwner(postSnapshot.getRef().getKey());
+                                ownerEntities.add(ownerEntity2);
+                            }
+                            itemsHalter = new String[ownerEntities.size()];
+                            for(int i=0; i<itemsHalter.length; i++){
+                                itemsHalter[i]= ownerEntities.get(i).getFamilyname();
+                            }
+                            adapterHalter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_dropdown_item, itemsHalter);
+                            dropdownHalter.setAdapter(adapterHalter);
+
+                            dropdownHalter.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
     }
 }

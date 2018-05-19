@@ -11,17 +11,28 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
+
+import com.example.alexa.carwiki.Adapter.BrandAdapter;
 import com.example.alexa.carwiki.Adapter.OwnerAdapter;
+import com.example.alexa.carwiki.Entities.CarBrandEntity2;
 import com.example.alexa.carwiki.Entities.OwnerEntity;
+import com.example.alexa.carwiki.Entities.OwnerEntity2;
 import com.example.alexa.carwiki.Helper.Async.GetAllOwners;
 import com.example.alexa.carwiki.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 //Same as in Gallery Activity
 public class GalleryOwnersActivity extends AppCompatActivity {
 
-    private List<OwnerEntity> ownerEntities;
+    private List<OwnerEntity2> ownerEntities = new ArrayList<>();
+    private ListView ownerGallery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,22 +48,9 @@ public class GalleryOwnersActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setTitle("Car Wiki");
 
-        ListView ownerGallery = findViewById(R.id.galleryViewOwner);
+        ownerGallery = findViewById(R.id.galleryViewOwner);
 
-        GetAllOwners getAllOwners = new GetAllOwners(getWindow().getDecorView().getRootView());
-
-        try {
-            ownerEntities = getAllOwners.execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-
-        OwnerAdapter carOwnerAdapter;
-        carOwnerAdapter = new OwnerAdapter(this, ownerEntities);
-        ownerGallery.setAdapter(carOwnerAdapter);
+        addEventFirebaseListener();
 
         ownerGallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -64,6 +62,37 @@ public class GalleryOwnersActivity extends AppCompatActivity {
         });
 
     }
+
+    private void addEventFirebaseListener(){
+        ownerGallery.setVisibility(View.INVISIBLE);
+        FirebaseDatabase.getInstance()
+                .getReference("owners")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            if(ownerEntities.size() > 0){
+                                ownerEntities.clear();
+                            }
+                            for (DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+                                OwnerEntity2 ownerEntity2 = postSnapshot.getValue(OwnerEntity2.class);
+                                ownerEntity2.setIdOwner(postSnapshot.getRef().getKey());
+                                ownerEntities.add(ownerEntity2);
+                            }
+                            OwnerAdapter adapter = new OwnerAdapter(GalleryOwnersActivity.this,ownerEntities);
+                            ownerGallery.setAdapter(adapter);
+
+                            ownerGallery.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_listowners, menu);

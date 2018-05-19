@@ -22,6 +22,8 @@ import com.example.alexa.carwiki.Helper.Async.DeleteAllBrands;
 import com.example.alexa.carwiki.Helper.Async.DeleteAllCars;
 import com.example.alexa.carwiki.Helper.Async.DeleteAllOwners;
 import com.example.alexa.carwiki.R;
+import com.google.firebase.FirebaseApp;
+
 import java.util.List;
 import java.util.Locale;
 

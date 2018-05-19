@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "895668023022",
+    "firebase_url": "https://carwikfirebase.firebaseio.com",
+    "project_id": "carwikfirebase",
+    "storage_bucket": "carwikfirebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:895668023022:android:5e233517ea4e4998",
+        "android_client_info": {
+          "package_name": "com.example.alexa.carwiki"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "895668023022-5dvpkdqp4t02re2au02cuj5n9uf9bf7v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.alexa.carwiki",
+            "certificate_hash": "97bee41c260c80275a4e21219a21e90609fe6ffc"
+          }
+        },
+        {
+          "client_id": "895668023022-pgad7r19n1pv715rs8s98bqn5qsgq2u1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6yv5-3zEa3TW3JnkP9WrvjOloN9HgR08"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "895668023022-pgad7r19n1pv715rs8s98bqn5qsgq2u1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

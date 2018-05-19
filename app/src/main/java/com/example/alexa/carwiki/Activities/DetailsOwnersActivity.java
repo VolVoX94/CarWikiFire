@@ -14,12 +14,14 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.alexa.carwiki.Entities.OwnerEntity;
+import com.example.alexa.carwiki.Entities.OwnerEntity2;
 import com.example.alexa.carwiki.Helper.Async.DeleteOwnerById;
 import com.example.alexa.carwiki.Helper.Download.DownloadImageTask;
 import com.example.alexa.carwiki.R;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class DetailsOwnersActivity extends AppCompatActivity {
-    private OwnerEntity owner;
+    private OwnerEntity2 owner;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +39,7 @@ public class DetailsOwnersActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Car Wiki");
 
         //Get Context Item
-        owner = (OwnerEntity) getIntent().getSerializableExtra("ContextItem");
+        owner = (OwnerEntity2) getIntent().getSerializableExtra("ContextItem");
 
         //Download Async Task to get the Image from Web
         new DownloadImageTask((ImageView) findViewById(R.id.imageViewOwner)).execute(owner.getImageUrl());
@@ -89,7 +91,11 @@ public class DetailsOwnersActivity extends AppCompatActivity {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            new DeleteOwnerById(getWindow().getDecorView().getRootView()).execute(owner.getIdOwner());
+
+                            FirebaseDatabase.getInstance()
+                                    .getReference("owners")
+                                    .child(owner.getIdOwner()).removeValue();
+
                             Intent intent = new Intent(getApplicationContext(), GalleryOwnersActivity.class);
                             startActivity(intent);
                         }

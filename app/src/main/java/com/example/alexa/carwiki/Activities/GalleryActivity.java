@@ -12,11 +12,20 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.example.alexa.carwiki.Adapter.BrandAdapter;
 import com.example.alexa.carwiki.Adapter.CarAdapter;
+import com.example.alexa.carwiki.Adapter.OwnerAdapter;
+import com.example.alexa.carwiki.Entities.CarBrandEntity2;
 import com.example.alexa.carwiki.Entities.CarEntity;
+import com.example.alexa.carwiki.Entities.CarEntity2;
+import com.example.alexa.carwiki.Entities.OwnerEntity2;
 import com.example.alexa.carwiki.Helper.Async.GetAllCars;
 
 import com.example.alexa.carwiki.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +33,10 @@ import java.util.concurrent.ExecutionException;
 
 public class GalleryActivity extends AppCompatActivity {
 
-    private List<CarEntity> carEntities;
+    private List<CarEntity2> carEntities = new ArrayList<>();
+    private List<CarBrandEntity2> brandEntities = new ArrayList<>();
+    private List<OwnerEntity2> ownerEntities = new ArrayList<>();
+    private ListView oldTimerGallery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,23 +53,17 @@ public class GalleryActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getSupportActionBar().setTitle("Car Wiki");
 
-        ListView oldTimerGallery = findViewById(R.id.galleryView);
+        oldTimerGallery = findViewById(R.id.galleryView);
 
-        //Gets all Cars to show
-        GetAllCars getAllCars = new GetAllCars(getWindow().getDecorView().getRootView());
-        carEntities = new ArrayList<CarEntity>();
+        addEventFirebaseListenerBrand();
+        addEventFirebaseListenerOwner();
+        addEventFirebaseListener();
 
-        try {
-            carEntities = getAllCars.execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
 
-        CarAdapter carAdapter;
+        /*CarAdapter carAdapter;
         carAdapter = new CarAdapter(this, carEntities);
-        oldTimerGallery.setAdapter(carAdapter);
+        oldTimerGallery.setAdapter(carAdapter);*/
+
 
         //Creates an onClickListener to track user activity
         oldTimerGallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -65,10 +71,105 @@ public class GalleryActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(getApplicationContext(), DetailsActivity.class);
                 intent.putExtra("ContextItem",carEntities.get(i));
+                CarBrandEntity2 sentBrand = new CarBrandEntity2();
+                OwnerEntity2 sendOwner = new OwnerEntity2();
+                for(int q=0; q < brandEntities.size(); q++){
+                    if(brandEntities.get(q).getIdBrand().equals(carEntities.get(i).getIdBrand())){
+                        sentBrand = brandEntities.get(q);
+                    }
+                }
+                for(int r=0; r < ownerEntities.size(); r++){
+                    if(ownerEntities.get(r).getIdOwner().equals(carEntities.get(i).getIdOwner())){
+                        sendOwner = ownerEntities.get(r);
+                    }
+                }
+                intent.putExtra("ContextItemBrand", sentBrand);
+                intent.putExtra("ContextItemOwner", sendOwner);
                 startActivity(intent);
             }
         });
 
+    }
+
+    private void addEventFirebaseListenerOwner(){
+        FirebaseDatabase.getInstance()
+                .getReference("owners")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            if(ownerEntities.size() > 0){
+                                ownerEntities.clear();
+                            }
+                            for (DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+                                OwnerEntity2 ownerEntity2 = postSnapshot.getValue(OwnerEntity2.class);
+                                ownerEntity2.setIdOwner(postSnapshot.getRef().getKey());
+                                ownerEntities.add(ownerEntity2);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+    private void addEventFirebaseListenerBrand(){
+        FirebaseDatabase.getInstance()
+                .getReference("brands")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            if(brandEntities.size() > 0){
+                                brandEntities.clear();
+                            }
+                            for (DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+                                CarBrandEntity2 carBrandEntity2 = postSnapshot.getValue(CarBrandEntity2.class);
+                                carBrandEntity2.setIdBrand(postSnapshot.getRef().getKey());
+                                System.out.println(carBrandEntity2.getIdBrand()+"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                                brandEntities.add(carBrandEntity2);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+    private void addEventFirebaseListener(){
+        oldTimerGallery.setVisibility(View.INVISIBLE);
+        FirebaseDatabase.getInstance()
+                .getReference("cars")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            if(carEntities.size() > 0){
+                                carEntities.clear();
+                            }
+                            for (DataSnapshot postSnapshot:dataSnapshot.getChildren()){
+                                CarEntity2 carEntity2 = postSnapshot.getValue(CarEntity2.class);
+                                carEntity2.setIdCar(postSnapshot.getRef().getKey());
+                                carEntities.add(carEntity2);
+                            }
+                            CarAdapter adapter = new CarAdapter(GalleryActivity.this,carEntities, brandEntities, ownerEntities);
+                            oldTimerGallery.setAdapter(adapter);
+
+                            oldTimerGallery.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
     }
 
     //Inflates Menu to make items accessible

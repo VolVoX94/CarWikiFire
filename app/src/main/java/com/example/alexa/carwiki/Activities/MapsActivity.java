@@ -4,7 +4,9 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
 import com.example.alexa.carwiki.Entities.CarBrandEntity;
+import com.example.alexa.carwiki.Entities.CarBrandEntity2;
 import com.example.alexa.carwiki.Entities.CarEntity;
+import com.example.alexa.carwiki.Entities.CarEntity2;
 import com.example.alexa.carwiki.Helper.Async.GetBrandById;
 import com.example.alexa.carwiki.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -18,8 +20,7 @@ import java.util.concurrent.ExecutionException;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    CarEntity currentCar;
-    CarBrandEntity currentCarBrandEntity;
+    CarEntity2 currentCar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,19 +47,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         // Add a marker in Sydney and move the camera
         //Gets context item
-        currentCar = (CarEntity) getIntent().getSerializableExtra("ContextItem");
+        currentCar = (CarEntity2) getIntent().getSerializableExtra("ContextItem");
 
-        //get brand related to car
-        try {
-            currentCarBrandEntity = new GetBrandById(getWindow().getDecorView().getRootView()).execute(currentCar.getIdBrand()).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
         //Set marker and move camera to specified point
         LatLng var = new LatLng(currentCar.getX(), currentCar.getY());
-        mMap.addMarker(new MarkerOptions().position(var).title(currentCarBrandEntity.getDescripion()+" "+currentCar.getModel()));
+        mMap.addMarker(new MarkerOptions().position(var).title(currentCar.getModel()));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(var));
     }
 }
